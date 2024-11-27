@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ev Fiyat Tahmini</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 20px;
+    }
+    label, select, input, button {
+      display: block;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ev Fiyat Tahmini</h1>
+  <h2>Ev Detaylarını Giriniz</h2>
+
+  <form id="predictionForm">
+    <label for="konut_type">Konut Tipi</label>
+    <select id="konut_type" name="konut_type" required>
+      <option value="konut_Satılık Bungalov">Satılık Bungalov</option>
+      <option value="konut_Satılık Daire">Satılık Daire</option>
+      <option value="konut_Satılık Köşk">Satılık Köşk</option>
+      <option value="konut_Satılık Müstakil Ev">Satılık Müstakil Ev</option>
+      <option value="konut_Satılık Prefabrik">Satılık Prefabrik</option>
+      <option value="konut_Satılık Residence">Satılık Residence</option>
+      <option value="konut_Satılık Villa">Satılık Villa</option>
+      <option value="konut_Satılık Yazlık">Satılık Yazlık</option>
+      <option value="konut_Satılık Çiftlik Evi">Satılık Çiftlik Evi</option>
+    </select>
+
+    <label for="oda_sayisi">Oda Sayısı</label>
+    <input type="number" id="oda_sayisi" name="oda_sayisi" min="1" max="10" value="1" required>
+
+    <label for="metre_kare">Alan (m²)</label>
+    <input type="number" id="metre_kare" name="metre_kare" min="20" max="1000" value="100" required>
+
+    <label for="bina_yasi">Bina Yaşı (Yıl)</label>
+    <input type="number" id="bina_yasi" name="bina_yasi" min="0" max="100" value="0" required>
+
+    <button type="submit">Tahmini Fiyatı Hesapla</button>
+  </form>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    document.getElementById('predictionForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const konutType = document.getElementById('konut_type').value;
+      const odaSayisi = document.getElementById('oda_sayisi').value;
+      const metreKare = document.getElementById('metre_kare').value;
+      const binaYasi = document.getElementById('bina_yasi').value;
+
+      const inputData = {
+        konut_type: konutType,
+        oda_sayisi: parseInt(odaSayisi),
+        metre_kare: parseInt(metreKare),
+        bina_yasi: parseInt(binaYasi)
+      };
+
+      try {
+        // Make a POST request to the backend
+        const response = await fetch('http://127.0.0.1:8000/predict', { // Replace with your backend URL
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(inputData)
+        });
+
+        const result = await response.json();
+
+        if (result.predicted_price !== undefined) {
+          document.getElementById('result').innerHTML = `Tahmini Fiyat: <b>${result.predicted_price.toFixed(2)} TL</b>`;
+        } else {
+          document.getElementById('result').innerHTML = `Hata: ${result.error}`;
+        }
+      } catch (error) {
+        document.getElementById('result').innerHTML = `Bir hata oluştu: ${error.message}`;
+      }
+    });
+  </script>
+
+</body>
+</html>
